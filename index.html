@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Math Gesture Tahun 2 KSSR | Anis Ai Studio</title>
+<style>
+:root{--ink:#17324d;--muted:#617b91;--card:#ffffff;--soft:#eef7fc;--gold:#f5c84b;--ok:#2d9b67;--bad:#d95c5c}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:var(--ink);background:linear-gradient(135deg,#eaf7ff,#fff7df);min-height:100vh}
+.app{width:min(980px,100%);margin:auto;padding:14px}
+header{text-align:center;padding:8px 4px 14px}.logo{font-size:42px}h1{font-size:clamp(27px,7vw,45px);margin:4px 0}.sub{color:var(--muted);margin:0}
+.card{background:var(--card);border-radius:24px;padding:18px;margin:13px 0;box-shadow:0 10px 30px #17324d18}
+.stats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.pill{background:var(--soft);padding:8px 13px;border-radius:999px;font-weight:700}
+.question{text-align:center}.questionText{font-size:clamp(44px,12vw,76px);font-weight:900;margin:13px 0}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:600px;margin:14px auto}.answer{background:#f7fbff;color:var(--ink);border:3px solid #d9ebf7;border-radius:16px;padding:17px 10px;font-size:27px;font-weight:800;cursor:pointer}.answer:active{transform:scale(.98)}.answer.selected{border-color:var(--gold);box-shadow:0 0 0 4px #f5c84b44}
+.feedback{text-align:center;min-height:31px;font-size:19px;font-weight:800;margin:8px}
+.controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}button{border:0;border-radius:14px;padding:12px 17px;font-size:16px;font-weight:800;cursor:pointer;background:var(--ink);color:#fff}.secondary{background:#e7f1f8;color:var(--ink)}
+.cameraGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr);gap:15px}.camera{position:relative;aspect-ratio:4/3;background:#08111b;border-radius:20px;overflow:hidden}.camera video{position:absolute;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.camera canvas{position:absolute;width:100%;height:100%;inset:0;transform:scaleX(-1);pointer-events:none}.camMsg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#fff;padding:25px;font-size:17px;line-height:1.5}.gesturePanel{text-align:center;display:flex;flex-direction:column;justify-content:center}.hand{font-size:75px}.gestureName{font-size:22px;font-weight:900;margin:6px}.mapping{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}.map{padding:9px;border-radius:12px;background:var(--soft);font-weight:700}
+.status{background:#fff5d8;border-radius:13px;padding:11px;line-height:1.45;font-size:14px;margin-bottom:12px}.status.ok{background:#e7f7ee}.status.bad{background:#fdeaea}
+.instructions li{margin:8px 0}.credit{text-align:center;font-weight:800;margin:18px 0 3px}.tag{text-align:center;color:var(--muted);font-weight:800;letter-spacing:1px}
+@media(max-width:680px){.app{padding:9px}.card{padding:14px;border-radius:20px}.cameraGrid{grid-template-columns:1fr}.gesturePanel{padding-top:4px}.answers{gap:8px}.answer{font-size:23px;padding:15px 8px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">✋🔢✨</div><h1>Math Gesture Tahun 2</h1><p class="sub">Tambah & Tolak • Gesture 1–4 jari</p></header>
+
+<section class="card">
+<div class="stats"><div class="pill">Soalan <span id="qNo">1</span>/10</div><div class="pill">Skor <span id="score">0</span> ⭐</div><div class="pill">KSSR Tahun 2</div></div>
+<div class="question"><div class="questionText" id="question">—</div><div class="answers" id="answers"></div><div class="feedback" id="feedback"></div></div>
+<div class="controls"><button id="start">▶ Mula Permainan</button><button class="secondary" id="next">➡ Seterusnya</button><button class="secondary" id="reset">↻ Reset</button></div>
+</section>
+
+<section class="card">
+<h2 style="text-align:center">✋ Apps Gesture</h2>
+<div id="status" class="status"><b>Langkah:</b> tekan “Aktifkan Kamera”, benarkan kamera, kemudian tunjuk 1–4 jari.</div>
+<div class="cameraGrid">
+<div class="camera"><video id="video" autoplay playsinline muted></video><canvas id="canvas"></canvas><div class="camMsg" id="camMsg">Kamera belum aktif.<br><br>Gesture akan memilih jawapan secara automatik.</div></div>
+<div class="gesturePanel">
+<div class="hand" id="hand">👋</div><div class="gestureName" id="gesture">Belum dikesan</div>
+<div class="mapping"><div class="map">☝️ 1 = A</div><div class="map">✌️ 2 = B</div><div class="map">🤟 3 = C</div><div class="map">🖐️ 4 = D</div></div>
+<button id="cameraBtn">📷 Aktifkan Kamera</button>
+<p class="sub" style="font-size:13px;margin-top:10px">Tip: pastikan tangan jelas dan tapak tangan menghadap kamera.</p>
+</div>
+</div>
+</section>
+
+<section class="card instructions"><h2>🎯 Cara Bermain</h2><ol><li>Tekan <b>Mula Permainan</b>.</li><li>Lihat soalan Matematik.</li><li>Pilih dengan butang atau tunjuk <b>1, 2, 3 atau 4 jari</b>.</li><li>Sistem menunggu gesture yang stabil sebelum memilih jawapan.</li><li>Jawapan betul mendapat <b>10 mata</b>.</li></ol></section>
+
+<section class="card"><h2>📚 Fokus Pembelajaran</h2><p>Operasi <b>tambah dan tolak</b> yang sesuai untuk murid Tahun 2, dengan pendekatan pembelajaran aktif, visual dan berasaskan teknologi.</p></section>
+
+<div class="credit">Disediakan dan diinovasikan oleh Cikgu Anisa Farihah @ KV Kajang.</div><div class="tag">ILMU. INOVASI. INSPIRASI. • Anis Ai Studio</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script>
+let score=0,q=1,currentAnswer=0,answered=false,answerChoices=[],lastCount=0,stable=0,lastAction=0,mpCamera=null;
+const $=id=>document.getElementById(id);
+
+function makeQuestion(){
+ answered=false;$("feedback").textContent="";
+ let a=Math.floor(Math.random()*20)+1,b=Math.floor(Math.random()*15)+1,add=Math.random()>.45;
+ if(!add&&b>a)[a,b]=[b,a];
+ currentAnswer=add?a+b:a-b;
+ $("question").textContent=`${a} ${add?"+":"−"} ${b} = ?`;
+ let opts=new Set([currentAnswer]);
+ while(opts.size<4){let n=Math.max(0,currentAnswer+Math.floor(Math.random()*11)-5);opts.add(n)}
+ answerChoices=[...opts].sort(()=>Math.random()-.5);
+ $("answers").innerHTML=answerChoices.map((n,i)=>`<button class="answer" data-v="${n}" data-index="${i+1}">${n}</button>`).join("");
+ document.querySelectorAll(".answer").forEach(btn=>btn.onclick=()=>checkAnswer(+btn.dataset.v,+btn.dataset.index));
+ $("qNo").textContent=q;
+}
+function checkAnswer(v,index){
+ if(answered)return;
+ answered=true;
+ document.querySelectorAll(".answer").forEach(b=>{if(+b.dataset.index===index)b.classList.add("selected")});
+ if(v===currentAnswer){score+=10;$("score").textContent=score;$("feedback").textContent="🎉 Betul! Hebat! +10 mata"}
+ else $("feedback").textContent=`😊 Belum tepat. Jawapan yang betul ialah ${currentAnswer}.`;
+}
+$("start").onclick=()=>{score=0;q=1;$("score").textContent=0;makeQuestion()}
+$("next").onclick=()=>{if(q<10){q++;makeQuestion()}else $("feedback").textContent=`🏆 Tamat! Skor anda: ${score}/100`}
+$("reset").onclick=()=>{score=0;q=1;$("score").textContent=0;makeQuestion()}
+
+function countFingers(lm){
+ // Thumb: compare x direction relative to index MCP, adjusted for mirrored video.
+ const ext=[];
+ const wrist=lm[0];
+ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+ // Four fingers: tip farther from wrist than PIP and MCP, with a small margin.
+ [[8,6,5],[12,10,9],[16,14,13],[20,18,17]].forEach(([tip,pip,mcp])=>{
+   ext.push(dist(lm[tip],wrist)>dist(lm[pip],wrist)*1.12 && dist(lm[tip],wrist)>dist(lm[mcp],wrist)*1.22);
+ });
+ // Thumb extension using distance from wrist and lateral separation.
+ ext.unshift(dist(lm[4],lm[2])>0.09 && dist(lm[4],wrist)>dist(lm[3],wrist)*1.08);
+ let count=ext.filter(Boolean).length;
+ // Thumb-only is noisy; for this activity, 1–4 are preferred.
+ return Math.max(0,Math.min(5,count));
+}
+function onResults(results){
+ const canvas=$("canvas"),ctx=canvas.getContext("2d");
+ canvas.width=results.image.width;canvas.height=results.image.height;ctx.clearRect(0,0,canvas.width,canvas.height);
+ if(!results.multiHandLandmarks||!results.multiHandLandmarks.length){
+   $("gesture").textContent="Tangan belum dikesan";$("hand").textContent="👋";lastCount=0;stable=0;return;
+ }
+ const lm=results.multiHandLandmarks[0];
+ drawConnectors(ctx,lm,HAND_CONNECTIONS,{color:"#ffffff",lineWidth:3});drawLandmarks(ctx,lm,{color:"#f5c84b",lineWidth:1,radius:3});
+ const count=countFingers(lm);
+ const labels=["","☝️ 1 jari","✌️ 2 jari","🤟 3 jari","🖐️ 4 jari","🖐️ 5 jari"];
+ $("hand").textContent=labels[count]||"✋";$("gesture").textContent=count?`${count} jari dikesan`:"Cuba tunjuk 1–4 jari";
+ if(count>=1&&count<=4&&!answered){
+   if(count===lastCount)stable++;else{lastCount=count;stable=1}
+   // require several consecutive frames and cooldown to avoid accidental selection
+   if(stable>12&&Date.now()-lastAction>1600){
+     lastAction=Date.now();checkAnswer(answerChoices[count-1],count);stable=0;
+   }
+ }else{lastCount=0;stable=0}
+}
+async function startGesture(){
+ if(!window.isSecureContext && location.hostname!=="localhost"){
+   $("status").className="status bad";
+   $("status").innerHTML="<b>⚠️ Kamera perlukan HTTPS.</b><br>Fail yang dibuka sebagai content:// atau file:// biasanya tidak boleh memberi akses kamera. Terbitkan aplikasi ke laman HTTPS untuk menggunakan gesture.";
+   return;
+ }
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+   $("status").className="status bad";$("status").textContent="Pelayar ini tidak menyokong akses kamera.";return;
+ }
+ try{
+   const video=$("video");
+   const hands=new Hands({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+   hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:.65,minTrackingConfidence:.65});
+   hands.onResults(onResults);
+   mpCamera=new Camera(video,{onFrame:async()=>{await hands.send({image:video})},width:720,height:540});
+   mpCamera.start();
+   $("camMsg").style.display="none";$("status").className="status ok";
+   $("status").innerHTML="<b>✅ Kamera aktif.</b> Tunjukkan 1–4 jari untuk memilih A–D.";
+   $("gesture").textContent="Mencari tangan…";
+ }catch(e){
+   $("status").className="status bad";$("status").innerHTML="<b>⚠️ Kamera gagal diaktifkan.</b><br>Benarkan Camera dalam tetapan pelayar dan cuba semula.";
+ }
+}
+$("cameraBtn").onclick=startGesture;
+makeQuestion();
+</script>
+</body>
+</html>
